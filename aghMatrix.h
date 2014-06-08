@@ -129,6 +129,14 @@ public:
 // Deklaracje metod specjalizowanych
 // ---------------------------------------
 
+/// \brief - specjalizowana metoda setItems dla char, pozwalaj¹ca zmieniæ wpisane wartoœci w macierz
+///
+/// \param r - iloœæ wierszy macierzy
+/// \param c - iloœæ kolumn macierzy
+/// \param tab - tablica wartoœci, które s¹ wpisywane w macierz
+template <>
+void aghMatrix<char>::setItems(int r, int c, ...);
+
 /// \brief Prze³adowanie operatora specjalizowanego "+" dla typu char.
 ///	 
 /// \details Traktuje on kolejne ma³e litery alfabetu jako kolejne liczby, a=0, b=1, itd.
@@ -218,6 +226,9 @@ aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & right);
 /// \return - obiekt, który jest wynikiem mno¿enia
 template<>
 aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & right);
+
+template<>
+aghMatrix<char*>::aghMatrix(int r, int c);
 // --------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
@@ -237,8 +248,6 @@ void aghMatrix<T>::alloc(int r, int c)
         for (int i = 0; i < rows; ++i)
         {
             mat[i] = new T[cols];
-            for (int j = 0; j < cols; ++j)
-                mat[i][j] = T();
         }
         is_free = false;
     } 

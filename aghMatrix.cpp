@@ -17,6 +17,23 @@ using namespace std;
 // -----------------------------------------------------------------------------
 
 template <>
+void aghMatrix<char>::setItems(int r, int c, ...)
+{
+    this->free();
+    this->alloc(r, c);
+
+    va_list vl;
+    va_start(vl, c);
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            mat[i][j] = va_arg(vl, int);
+        }
+    }
+    va_end(vl);
+}
+// -----------------------------------------------------------------------------
+
+template <>
 aghMatrix<char> aghMatrix<char>::operator+ (aghMatrix<char> const & orig)
 {
     if (this->getRows() != orig.getRows() || this->getCols() != orig.getCols())
@@ -81,6 +98,20 @@ aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & right)
 // -----------------------------------------------------------------------------
 
 template <>
+aghMatrix<char*>::aghMatrix(int r, int c)
+{
+    this->alloc(r, c);
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            mat[i][j] = nullptr;
+        }
+    }
+}
+// -----------------------------------------------------------------------------
+
+template <>
 aghMatrix<char*>::aghMatrix(aghMatrix<char*> const& pattern)
 {
     this->alloc(pattern.getRows(), pattern.getCols());
@@ -101,7 +132,10 @@ aghMatrix<char*>::~aghMatrix()
     for (int i = 0; i < rows; ++i)
     {
         for (int j = 0; j < cols; ++j)
+        {
+        if (mat[i][j] != nullptr)
             delete[] mat[i][j];
+        }
     }
     this->free();
 }
@@ -112,6 +146,8 @@ void aghMatrix<char*>::setItem(int r, int c, char* val)
 {
     if (r < 0 || r >= rows || c < 0 || c >= cols)
         throw aghException(1, "Index out of range", __FILE__, __LINE__);
+    if (mat[r][c] != nullptr)
+        delete[] mat[r][c];
     mat[r][c] = new char[strlen(val) + 1];
     strcpy(mat[r][c], val);
 }
@@ -120,10 +156,12 @@ void aghMatrix<char*>::setItem(int r, int c, char* val)
 template <>
 void aghMatrix<char*>::setItems(char** tab)
 {
-    for (int i = 0; i < rows; ++i)
+   for (int i = 0; i < rows; ++i)
     {
         for (int j = 0; j < cols; ++j)
         {
+            if (mat[i][j] != nullptr)
+                delete mat[i][j];
             mat[i][j] = new char[strlen(*tab) + 1];
             strcpy(mat[i][j], *tab);
             ++tab;
@@ -135,10 +173,10 @@ void aghMatrix<char*>::setItems(char** tab)
 template <>
 void aghMatrix<char*>::setItems(int r, int c, ...)
 {
-    this->~aghMatrix();
-
     if (r < 0 || c < 0)
         throw aghException(0, "Index out of range", __FILE__, __LINE__);
+
+    this->free();
 
     this->alloc(r, c);
     va_list vl;
@@ -157,7 +195,7 @@ const aghMatrix<char*>& aghMatrix<char*>::operator= (const aghMatrix<char*>& rig
 {
     if (*this != right)
     {
-        this->~aghMatrix();
+        this->free();
 
         this->alloc(right.getRows(), right.getCols()); 
         for (int i = 0; i < rows; ++i)
@@ -174,8 +212,13 @@ const aghMatrix<char*>& aghMatrix<char*>::operator= (const aghMatrix<char*>& rig
 // -----------------------------------------------------------------------------
 
 template <>
-aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & orig)
+aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & right)
 {
+    if (rows != right.getRows() || cols != right.getCols())
+    {
+        throw aghException(4, "Incompatible matrices' sizes, cannot sum", __FILE__, __LINE__);
+    }
+
     aghMatrix<char*> result(rows, cols);
 
     for (int i = 0; i < rows; ++i)
@@ -190,9 +233,15 @@ aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & orig)
 // -----------------------------------------------------------------------------
 
 template<>
-aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & orig)
+aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & right)
 {
+    if (cols != right.getRows())
+    {
+        throw aghException(4, "Incompatible matrices' sizes, cannot sum", __FILE__, __LINE__);
+    }
+
     aghMatrix<char*> result(rows, cols);
+
     for (int i = 0; i < rows; ++i)
     {
         for (int j = 0; j < cols; ++j)
