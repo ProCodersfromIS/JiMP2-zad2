@@ -10,6 +10,7 @@ int main(void)
 
     ///////////////////////////////////////////////////////
 
+
     int it1[] = {84, 23, 84, 21, 120, 93, -131, 238};
     int it2[] = {249, 24, 82, 3};
     int it3[] = {439, 828, 39, 230, 95, 1, -242, 34};
@@ -23,7 +24,6 @@ int main(void)
     imtest1.setItems(4, 1, 249, 24, 82, 3);
     imtest2.setItems(2, 4, 500+23, 851, 123, 251, 215, 94, -373, 272);
     imtest3.setItems(2, 1, 28419, 22084);
-
 
     aghMatrix<int>& imref1 = *imptr1;
     aghMatrix<int>& imref2 = *imptr2;
@@ -183,11 +183,13 @@ int main(void)
     aghMatrix<char*>* cpmptr1 = new aghMatrix<char*>(1, 1);
     aghMatrix<char*> cpmtest1, cpmtest2;
 
+
+
     cpm1.setItems(cpt);
     cpm2.setItems(cpt+5);
     cpm3.setItems(cpt+3);
     cpmptr1->setItem(0, 0, cpt[5]);
-
+    
     cpmtest1.setItems(2, 3, "torzmiae", "jestdnaci", "tablickore", "wyrazobed", "oelmntai", "rozmiaecy");
     cpmtest2.setItems(2, 1, "oai", "wyrazomie");
 

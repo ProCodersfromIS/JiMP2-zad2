@@ -8,12 +8,12 @@
 
 #include "dod_funkcje.h"
 
-int conversion(char arg)
+int conversion(char right)
 {
-    return arg - 97;
+    return right - 97;
 }
 
-char conversion(int arg)
+char conversion(int right)
 {
-    return arg + 97;
+    return right + 97;
 }

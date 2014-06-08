@@ -87,7 +87,7 @@ public:
 	///
 	/// \param r - iloœæ wierszy macierzy
 	/// \param c - iloœæ kolumn macierzy
-	/// \param ... - argumenty, które s¹ wpisywane w macierz
+	/// \param ... - rightumenty, które s¹ wpisywane w macierz
 	void setItems(int r, int c, ...);
 
 	/// \brief Prze³adowanie operatora przypisania "="
@@ -97,25 +97,25 @@ public:
 
 	/// \brief Prze³adowanie operatora dodawania "+", pozwala dodawaæ obiekty do siebie
 	/// 
-	/// \param arg - referencja do drugiego sk³adnika dodawania
+	/// \param right - referencja do drugiego sk³adnika dodawania
 	/// \return - obiekt, który jest wynikiem dodawania
-    aghMatrix operator+ (const aghMatrix<T> & arg);
+    aghMatrix operator+ (const aghMatrix<T> & right);
 
 	/// \brief Prze³adowanie operatora mno¿enia "*"
 	///
-	/// \param arg - referencja do drugiego czynnika mno¿enia
+	/// \param right - referencja do drugiego czynnika mno¿enia
 	/// \return - obiekt, który jest wynikiem mno¿enia
-    aghMatrix operator* (const aghMatrix<T> & arg);
+    aghMatrix operator* (const aghMatrix<T> & right);
 
 	/// \brief Prze³adowanie operatora porównania "=="
 	///
-	/// \param arg - referencja do drugiego argumentu operacji porównania
-    bool operator== (const aghMatrix<T>& arg);
+	/// \param right - referencja do drugiego rightumentu operacji porównania
+    bool operator== (const aghMatrix<T>& right);
 
 	/// \brief Prze³adowanie operatora porównania "!="
 	///
-	/// \param arg - referencja do drugiego argumentu operacji porównania
-    bool operator!= (const aghMatrix<T>& arg);
+	/// \param right - referencja do drugiego rightumentu operacji porównania
+    bool operator!= (const aghMatrix<T>& right);
 
 	/// \brief Prze³adowanie operatora "()", pozwala odnieœæ siê do konkretnego elementu macierzy
 	///
@@ -129,28 +129,35 @@ public:
 // Deklaracje metod specjalizowanych
 // ---------------------------------------
 
-/// \brief Specjalizowana metoda zwalniaj¹ca pamiêæ dla typu char*
-template <>
-void aghMatrix<char*>::free();
-
-/// \brief Specjalizowany konstruktor bezparametrowy
-template <>
-aghMatrix<char*>::aghMatrix();
-
-/// \brief Specjalizowany konstruktor parametrowy
+/// \brief Prze³adowanie operatora specjalizowanego "+" dla typu char.
+///	 
+/// \details Traktuje on kolejne ma³e litery alfabetu jako kolejne liczby, a=0, b=1, itd.
+/// Daje poprawne wyniki w zakresie ma³ych liter.
 ///
-/// \param r - liczba wierszy
-/// \param c - liczba kolumn
+/// \param right - referencja do drugiego sk³adnika dodawania
+/// \return - obiekt, który jest wynikiem dodawania
 template <>
-aghMatrix<char*>::aghMatrix(int r, int c);
+aghMatrix<char> aghMatrix<char>::operator+ (aghMatrix<char> const & orig);
+
+/// \brief Prze³adowanie operatora specjalizowanego "*" dla typu char.
+///	 
+/// \details Traktuje on kolejne ma³e litery alfabetu jako kolejne liczby np. a=0, b=1, itd.
+/// Daje poprawne wyniki w zakresie ma³ych liter.
+///
+/// \param right - referencja do drugiego czynnika mno¿enia
+/// \return - obiekt, który jest wynikiem mno¿enia
+template <>
+aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & orig);
 
 /// \brief Specjalizowany konstruktor kopiuj¹cy
 ///
 /// \param orig - obiekt wzorzec
-/*
 template <>
-aghMatrix<char*>::aghMatrix(aghMatrix<char*>& orig);
-*/
+aghMatrix<char*>::aghMatrix(aghMatrix<char*> const & orig);
+
+/// \brief Specjalizowany destruktor klasy
+template <>
+aghMatrix<char*>::~aghMatrix();
 
 /// \brief Specjalizowana metoda dla char* pozwalaj¹ca zmieniæ wartoœæ konkretnego elementu
 ///
@@ -174,74 +181,67 @@ void aghMatrix<char*>::setItems(char** tab);
 template <>
 void aghMatrix<char*>::setItems(int r, int c, ...);
 
-/// \brief - specjalizowane prze³adowanie operatora porównania dla typu char*
+/// \brief Prze³adowanie operatora przypisania "="
 ///
-/// \param arg - referencja do obiektu do którego porównujemy
+/// \param right - referencja do obiektu macierzystego - wzorca
 template <>
-bool aghMatrix<char*>::operator== (const aghMatrix<char*>& arg);
+const aghMatrix<char*>& aghMatrix<char*>::operator= (const aghMatrix<char*>& right);
 
 /// \brief - specjalizowane prze³adowanie operatora porównania dla typu char*
 ///
-/// \param arg - referencja do obiektu do którego porównujemy
+/// \param right - referencja do obiektu do którego porównujemy
 template <>
-bool aghMatrix<char*>::operator!= (const aghMatrix<char*>& arg);
+bool aghMatrix<char*>::operator== (const aghMatrix<char*>& right);
 
-/// \brief Prze³adowanie operatora specjalizowanego "+" dla typu char.
-///	 
-/// \details Traktuje on kolejne ma³e litery alfabetu jako kolejne liczby, a=0, b=1, itd.
-/// Daje poprawne wyniki w zakresie ma³ych liter.
+/// \brief - specjalizowane prze³adowanie operatora porównania dla typu char*
 ///
-/// \param arg - referencja do drugiego sk³adnika dodawania
-/// \return - obiekt, który jest wynikiem dodawania
+/// \param right - referencja do obiektu do którego porównujemy
 template <>
-aghMatrix<char> aghMatrix<char>::operator+ (aghMatrix<char> const & orig);
-
-/// \brief Prze³adowanie operatora specjalizowanego "*" dla typu char.
-///	 
-/// \details Traktuje on kolejne ma³e litery alfabetu jako kolejne liczby np. a=0, b=1, itd.
-/// Daje poprawne wyniki w zakresie ma³ych liter.
-///
-/// \param arg - referencja do drugiego czynnika mno¿enia
-/// \return - obiekt, który jest wynikiem mno¿enia
-template <>
-aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & orig);
+bool aghMatrix<char*>::operator!= (const aghMatrix<char*>& right);
 
 /// \brief Prze³adowanie operatora specjalizowanego "+" dla typu char*.
 ///	 
-/// \details Argumentami operacji dodawania s¹ wyrazy, traktowane jako zbiory liter.
+/// \details rightumentami operacji dodawania s¹ wyrazy, traktowane jako zbiory liter.
 /// Wynikiem dodawania s¹ zbiory liter.
 ///
-/// \param arg - referencja do drugiego sk³adnika dodawania
+/// \param right - referencja do drugiego sk³adnika dodawania
 /// \return - obiekt, który jest wynikiem dodawania
 template <>
-aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & orig);
+aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & right);
 
 /// \brief Prze³adowanie operatora specjalizowanego "*" dla typu char*.
 ///	 
-/// \details Argumentami operacji dodawania s¹ wyrazy, traktowane jako zbiory liter.
+/// \details rightumentami operacji dodawania s¹ wyrazy, traktowane jako zbiory liter.
 /// Wynikiem mno¿enia jest czêœæ wspólna obu zbiorów liter.
 ///
-/// \param arg - referencja do drugiego czynnika mno¿enia
+/// \param right - referencja do drugiego czynnika mno¿enia
 /// \return - obiekt, który jest wynikiem mno¿enia
 template<>
-aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & orig);
+aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & right);
 // --------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
 //Definicje metod szablonu klasy aghMatrix
 // -----------------------------------------------------------------------------
 
 template <class T>
 void aghMatrix<T>::alloc(int r, int c)
 {
+    if (r < 0 || c < 0)
+        throw aghException(0, "Index out of range", __FILE__, __LINE__);
     if (is_free)
     {
         rows = r;
         cols = c;
         mat = new T*[r];
         for (int i = 0; i < rows; ++i)
+        {
             mat[i] = new T[cols];
+            for (int j = 0; j < cols; ++j)
+                mat[i][j] = T();
+        }
         is_free = false;
-    }
+    } 
 }
 // -----------------------------------------------------------------------------
 
@@ -253,6 +253,7 @@ void aghMatrix<T>::free()
         for (int i = 0; i < rows; ++i)
             delete[] mat[i];
         delete[] mat;
+
         mat = nullptr;
         is_free = true;
         rows = 0;
@@ -264,7 +265,8 @@ void aghMatrix<T>::free()
 template <class T>
 aghMatrix<T>::aghMatrix()
 {
-    this->alloc(0, 0);
+    rows = 0;
+    cols = 0;
     mat = nullptr;
 }
 // -----------------------------------------------------------------------------
@@ -273,13 +275,6 @@ template <class T>
 aghMatrix<T>::aghMatrix(int r, int c)
 {
     this->alloc(r, c);
-}
-// -----------------------------------------------------------------------------
-
-template <class T>
-aghMatrix<T>::~aghMatrix()
-{
-    this->free();
 }
 // -----------------------------------------------------------------------------
 
@@ -294,6 +289,13 @@ aghMatrix<T>::aghMatrix(const aghMatrix<T>& orig)
             mat[i][j] = orig.get(i, j);
         }
     }
+}
+// -----------------------------------------------------------------------------
+
+template <class T>
+aghMatrix<T>::~aghMatrix()
+{
+    this->free();
 }
 // -----------------------------------------------------------------------------
 
@@ -399,14 +401,14 @@ const aghMatrix<T> & aghMatrix<T>::operator= (const aghMatrix<T> & orig)
             }
         }
     }
-    return orig;
+    return *this;
 }
 // -----------------------------------------------------------------------------
 
 template <class T>
-aghMatrix<T> aghMatrix<T>::operator+ (const aghMatrix<T> & arg)
+aghMatrix<T> aghMatrix<T>::operator+ (const aghMatrix<T> & right)
 {
-    if (rows != arg.getRows() || cols != arg.getCols())
+    if (rows != right.getRows() || cols != right.getCols())
     {
         throw aghException(2, "Incompatible matrices' sizes, cannot sum", __FILE__, __LINE__);
     }
@@ -417,7 +419,7 @@ aghMatrix<T> aghMatrix<T>::operator+ (const aghMatrix<T> & arg)
         {
             for (int j = 0; j < cols; ++j)
             {
-                result.setItem(i, j, (this->get(i, j) + arg.get(i, j)));
+                result.setItem(i, j, (this->get(i, j) + right.get(i, j)));
             }
         }
         return result;
@@ -426,11 +428,11 @@ aghMatrix<T> aghMatrix<T>::operator+ (const aghMatrix<T> & arg)
 // ----------------------------------------------------------------------------
 
 template <class T>
-aghMatrix<T> aghMatrix<T>::operator* (const aghMatrix<T> & arg)
+aghMatrix<T> aghMatrix<T>::operator* (const aghMatrix<T> & right)
 {
     int r = rows; //iloœæ wierszy macierzy wyniku
-    int c = arg.getCols(); //iloœæ kolumn macierzy wyniku
-    if (cols != arg.getRows())
+    int c = right.getCols(); //iloœæ kolumn macierzy wyniku
+    if (cols != right.getRows())
     {
         throw aghException(2, "Incompatible matrices' sizes, cannot multiply", __FILE__, __LINE__);
     }
@@ -444,7 +446,7 @@ aghMatrix<T> aghMatrix<T>::operator* (const aghMatrix<T> & arg)
                 result.setItem(i, j, 0);
                 for (int k = 0; k < cols; ++k)
                 {
-                    result.setItem(i, j, result.get(i, j) + this->get(i, k) * arg.get(k, j));
+                    result.setItem(i, j, result.get(i, j) + this->get(i, k) * right.get(k, j));
                 }
             }
         }
@@ -454,9 +456,9 @@ aghMatrix<T> aghMatrix<T>::operator* (const aghMatrix<T> & arg)
 // ----------------------------------------------------------------------------
 
 template <class T>
-bool aghMatrix<T>::operator== (const aghMatrix<T>& arg)
+bool aghMatrix<T>::operator== (const aghMatrix<T>& right)
 {
-    if (rows != arg.getRows() || cols != arg.getCols())
+    if (rows != right.getRows() || cols != right.getCols())
     {
         return false;
     }
@@ -465,7 +467,7 @@ bool aghMatrix<T>::operator== (const aghMatrix<T>& arg)
     {
         for (int j = 0; j < cols; ++j)
         {
-            if (this->get(i, j) != arg.get(i, j))
+            if (this->get(i, j) != right.get(i, j))
             {
                 result = false;
             }
@@ -476,24 +478,10 @@ bool aghMatrix<T>::operator== (const aghMatrix<T>& arg)
 // -----------------------------------------------------------------------------
 
 template <class T>
-bool aghMatrix<T>::operator!= (const aghMatrix<T>& arg)
+bool aghMatrix<T>::operator!= (const aghMatrix<T>& right)
 {
-    if (rows != arg.getRows() || cols != arg.getCols())
-    {
-        return true;
-    }
-    bool result = false;
-    for (int i = 0; i < rows; ++i)
-    {
-        for (int j = 0; j < cols; ++j)
-        {
-            if (this->get(i, j) != arg.get(i, j))
-            {
-                result = true;
-            }
-        }
-    }
-    return result;
+    
+    return !(this->operator==(right));
 }
 // -----------------------------------------------------------------------------
 

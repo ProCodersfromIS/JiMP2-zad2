@@ -7,36 +7,13 @@
 // ------------------------------------------------------
 
 #include <iostream>
+#include <string>
 // -----------------------------------------------------------------------------
 
-#include "aghMatrix.h"
-#include "dod_funkcje.h"
-#include "aghException.h"
+#include "aghInclude.h"
 // -----------------------------------------------------------------------------
 
 using namespace std;
-// -----------------------------------------------------------------------------
-
-template <>
-void aghMatrix<char*>::free()
-{
-    if (!is_free)
-    {
-        for (int i = 0; i < rows; ++i)
-        {
-            for (int j = 0; j < cols; ++j)
-            {
-                delete[] mat[i][j];
-            }
-            delete[] mat[i];
-        }
-        delete[]mat;
-        mat = nullptr;
-        is_free = true;
-        rows = 0;
-        cols = 0;
-    }
-}
 // -----------------------------------------------------------------------------
 
 template <>
@@ -73,16 +50,16 @@ aghMatrix<char> aghMatrix<char>::operator+ (aghMatrix<char> const & orig)
 // -----------------------------------------------------------------------------
 
 template <>
-aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & arg)
+aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & right)
 {
-    if (cols != arg.getRows())
+    if (cols != right.getRows())
     {
         throw aghException(2, "Incompatible matrices' sizes, cannot sum", __FILE__, __LINE__);
     }
     else
     {
         int r = rows; //ilosc wierszy macierzy wyniku
-        int c = arg.getCols(); //ilosc kolumn macierzy wyniku
+        int c = right.getCols(); //ilosc kolumn macierzy wyniku
         int val;
         aghMatrix<char> result(r, c);
         for (int i = 0; i < r; ++i)
@@ -92,7 +69,7 @@ aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & arg)
                 val = 0;
                 for (int k = 0; k < cols; ++k)
                 {
-                    val += conversion(this->get(i, k)) * conversion(arg.get(k, j));
+                    val += conversion(this->get(i, k)) * conversion(right.get(k, j));
                 }
                 val = val % 26;
                 result.setItem(i, j, conversion(val));
@@ -104,9 +81,110 @@ aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & arg)
 // -----------------------------------------------------------------------------
 
 template <>
+aghMatrix<char*>::aghMatrix(aghMatrix<char*> const& pattern)
+{
+    this->alloc(pattern.getRows(), pattern.getCols());
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            mat[i][j] = new char[strlen(pattern.get(i, j)) + 1];
+            strcpy(mat[i][j], pattern.get(i, j));
+        }
+    }
+}
+// -----------------------------------------------------------------------------
+
+template <>
+aghMatrix<char*>::~aghMatrix()
+{
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+            delete[] mat[i][j];
+    }
+    this->free();
+}
+// -----------------------------------------------------------------------------
+
+template <>
+void aghMatrix<char*>::setItem(int r, int c, char* val)
+{
+    if (r < 0 || r >= rows || c < 0 || c >= cols)
+        throw aghException(1, "Index out of range", __FILE__, __LINE__);
+    mat[r][c] = new char[strlen(val) + 1];
+    strcpy(mat[r][c], val);
+}
+// -----------------------------------------------------------------------------
+
+template <>
+void aghMatrix<char*>::setItems(char** tab)
+{
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            mat[i][j] = new char[strlen(*tab) + 1];
+            strcpy(mat[i][j], *tab);
+            ++tab;
+        }
+    }
+}
+// -----------------------------------------------------------------------------
+
+template <>
+void aghMatrix<char*>::setItems(int r, int c, ...)
+{
+    this->~aghMatrix();
+
+    if (r < 0 || c < 0)
+        throw aghException(0, "Index out of range", __FILE__, __LINE__);
+
+    this->alloc(r, c);
+    va_list vl;
+    va_start(vl, c);
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            mat[i][j] = va_arg(vl, char*);
+        }
+    }
+    va_end(vl);
+}
+// -----------------------------------------------------------------------------
+
+template<>
+const aghMatrix<char*>& aghMatrix<char*>::operator= (const aghMatrix<char*>& right)
+{
+    if (*this != right)
+    {
+        this->~aghMatrix();
+
+        this->alloc(right.getRows(), right.getCols()); 
+        for (int i = 0; i < rows; ++i)
+        {
+            for (int j = 0; j < cols; ++j)
+            {
+                mat[i][j] = new char[strlen(right.get(i, j)) + 1];
+                strcpy(mat[i][j], right.get(i, j));
+            }
+        }
+    }
+    return *this;
+}
+// -----------------------------------------------------------------------------
+
+template <>
 aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & orig)
 {
-    aghMatrix<char*> result = orig;
+    aghMatrix<char*> result(rows, cols);
+
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            result.setItem(i, j, "ok");
+        }
+    }
     return result;
 }
 // -----------------------------------------------------------------------------
@@ -114,58 +192,39 @@ aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & orig)
 template<>
 aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & orig)
 {
-    aghMatrix<char*> result = orig;
+    aghMatrix<char*> result(rows, cols);
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            result.setItem(i, j, "ok");
+        }
+    }
+
     return result;
 }
 // -----------------------------------------------------------------------------
 
 template <>
-aghMatrix<char*>::aghMatrix(aghMatrix<char*> const& pattern)
+bool aghMatrix<char*>::operator== (const aghMatrix<char*>& right)
 {
-
+    if (rows != right.getRows() || cols != right.getCols())
+        return false;
+    for (int i = 0; i < rows; ++i)
+    {
+        for (int j = 0; j < cols; ++j)
+        {
+            if (strcmp(mat[i][j], right.get(i, j)) != 0)
+                return false;
+        }
+    }
+    return true;
 }
 // -----------------------------------------------------------------------------
 
 template <>
-aghMatrix<char*>::aghMatrix(int r, int c)
+bool aghMatrix<char*>::operator!= (const aghMatrix<char*>& right)
 {
-
-}
-// -----------------------------------------------------------------------------
-
-template <>
-void aghMatrix<char*>::setItem(int r, int c, char* val)
-{
-
-}
-// -----------------------------------------------------------------------------
-
-template <>
-void aghMatrix<char*>::setItems(char** tab)
-{
-
-}
-// -----------------------------------------------------------------------------
-
-template <>
-void aghMatrix<char*>::setItems(int r, int c, ...)
-{
-
-}
-// -----------------------------------------------------------------------------
-
-template <>
-bool aghMatrix<char*>::operator== (const aghMatrix<char*>& arg)
-{
-    bool result = true;
-    return result;
-}
-// -----------------------------------------------------------------------------
-
-template <>
-bool aghMatrix<char*>::operator!= (const aghMatrix<char*>& arg)
-{
-    bool result = false;
-    return result;
+    return !(this->operator==(right));
 }
 // -----------------------------------------------------------------------------

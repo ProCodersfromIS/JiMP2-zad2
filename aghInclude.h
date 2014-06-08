@@ -23,8 +23,8 @@ using namespace std;
 
 #include "aghException.h"
 #include "aghMatrix.h"
-#include "dod_funkcje.h"
 #include "aghComplex.h"
+#include "dod_funkcje.h"
 // ------------------------------------------------------
 
 #endif
