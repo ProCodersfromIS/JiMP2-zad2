@@ -19,5 +19,18 @@ int conversion(char right);
 /// \param right - zmienna typu char
 char conversion(int right);
 
+/// \brief Funkcja zwraca sumê dwóch tablic znaków
+///
+/// \param A - pierwsza tablica
+/// \param B - druga tablica
+/// \return - suma dwóch argumentów
+char* sumOfString(char* A, char* B);
+
+/// \brief Funkcja zwraca iloczyn dwóch tablic znaków
+///
+/// \param A - pierwsza tablica
+/// \param B - druga tablica
+/// \return - iloczyn dwóch argumentów
+char* multOfString(char* A, char* B);
 
 #endif

@@ -22,14 +22,14 @@ void aghMatrix<char>::setItems(int r, int c, ...)
     this->free();
     this->alloc(r, c);
 
-    va_list vl;
-    va_start(vl, c);
+    va_list listOfValues;
+    va_start(listOfValues, c);
     for (int i = 0; i < r; i++) {
         for (int j = 0; j < c; j++) {
-            mat[i][j] = va_arg(vl, int);
+            mat[i][j] = va_arg(listOfValues, int);
         }
     }
-    va_end(vl);
+    va_end(listOfValues);
 }
 // -----------------------------------------------------------------------------
 
@@ -97,6 +97,30 @@ aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & right)
 }
 // -----------------------------------------------------------------------------
 
+template<>
+void aghMatrix<char*>::free(void)
+{
+    if (!is_free)
+    {
+        for (int i = 0; i < rows; ++i)
+        {
+            for (int j = 0; j < cols; ++j)
+            {
+                delete[] mat[i][j];
+            }
+            delete[] mat[i];
+        }
+
+        delete[] mat;
+
+        mat = nullptr;
+        is_free = true;
+        rows = 0;
+        cols = 0;
+    }
+}
+// -----------------------------------------------------------------------------
+
 template <>
 aghMatrix<char*>::aghMatrix(int r, int c)
 {
@@ -119,8 +143,13 @@ aghMatrix<char*>::aghMatrix(aghMatrix<char*> const& pattern)
     {
         for (int j = 0; j < cols; ++j)
         {
-            mat[i][j] = new char[strlen(pattern.get(i, j)) + 1];
-            strcpy(mat[i][j], pattern.get(i, j));
+            if (pattern.get(i, j) == nullptr)
+                mat[i][j] = nullptr;
+            else
+            {
+                mat[i][j] = new char[strlen(pattern.get(i, j)) + 1];
+                strcpy(mat[i][j], pattern.get(i, j));
+            }
         }
     }
 }
@@ -129,14 +158,6 @@ aghMatrix<char*>::aghMatrix(aghMatrix<char*> const& pattern)
 template <>
 aghMatrix<char*>::~aghMatrix()
 {
-    for (int i = 0; i < rows; ++i)
-    {
-        for (int j = 0; j < cols; ++j)
-        {
-        if (mat[i][j] != nullptr)
-            delete[] mat[i][j];
-        }
-    }
     this->free();
 }
 // -----------------------------------------------------------------------------
@@ -146,10 +167,14 @@ void aghMatrix<char*>::setItem(int r, int c, char* val)
 {
     if (r < 0 || r >= rows || c < 0 || c >= cols)
         throw aghException(1, "Index out of range", __FILE__, __LINE__);
-    if (mat[r][c] != nullptr)
-        delete[] mat[r][c];
-    mat[r][c] = new char[strlen(val) + 1];
-    strcpy(mat[r][c], val);
+    delete[] mat[r][c];
+    if (val == nullptr)
+        mat[r][c] = nullptr;
+    else
+    {
+        mat[r][c] = new char[strlen(val) + 1];
+        strcpy(mat[r][c], val);
+    }
 }
 // -----------------------------------------------------------------------------
 
@@ -160,10 +185,14 @@ void aghMatrix<char*>::setItems(char** tab)
     {
         for (int j = 0; j < cols; ++j)
         {
-            if (mat[i][j] != nullptr)
-                delete mat[i][j];
-            mat[i][j] = new char[strlen(*tab) + 1];
-            strcpy(mat[i][j], *tab);
+            delete [] mat[i][j];
+            if (*tab == nullptr)
+                mat[i][j] = nullptr;
+            else
+            {
+                mat[i][j] = new char[strlen(*tab) + 1];
+                strcpy(mat[i][j], *tab);
+            }
             ++tab;
         }
     }
@@ -177,16 +206,24 @@ void aghMatrix<char*>::setItems(int r, int c, ...)
         throw aghException(0, "Index out of range", __FILE__, __LINE__);
 
     this->free();
-
     this->alloc(r, c);
-    va_list vl;
-    va_start(vl, c);
+
+    va_list listOfValues;
+    va_start(listOfValues, c);
     for (int i = 0; i < r; i++) {
         for (int j = 0; j < c; j++) {
-            mat[i][j] = va_arg(vl, char*);
+            mat[i][j] = new char[strlen(va_arg(listOfValues, char*)) + 1];
         }
     }
-    va_end(vl);
+
+    va_start(listOfValues, c);
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            strcpy(mat[i][j], va_arg(listOfValues, char*));
+        }
+    }
+
+    va_end(listOfValues);
 }
 // -----------------------------------------------------------------------------
 
@@ -202,8 +239,13 @@ const aghMatrix<char*>& aghMatrix<char*>::operator= (const aghMatrix<char*>& rig
         {
             for (int j = 0; j < cols; ++j)
             {
-                mat[i][j] = new char[strlen(right.get(i, j)) + 1];
-                strcpy(mat[i][j], right.get(i, j));
+                if (right.get(i, j) == nullptr)
+                    mat[i][j] = nullptr;
+                else
+                {
+                    mat[i][j] = new char[strlen(right.get(i, j)) + 1];
+                    strcpy(mat[i][j], right.get(i, j));
+                }
             }
         }
     }
@@ -225,7 +267,7 @@ aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & right)
     {
         for (int j = 0; j < cols; ++j)
         {
-            result.setItem(i, j, "ok");
+            result.setItem(i, j, sumOfString(mat[i][j], right.get(i, j)));
         }
     }
     return result;
@@ -237,19 +279,24 @@ aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & right)
 {
     if (cols != right.getRows())
     {
-        throw aghException(4, "Incompatible matrices' sizes, cannot sum", __FILE__, __LINE__);
+        throw aghException(2, "Incompatible matrices' sizes, cannot multiply", __FILE__, __LINE__);
     }
 
-    aghMatrix<char*> result(rows, cols);
+    aghMatrix<char*> result(rows, right.getCols());
 
-    for (int i = 0; i < rows; ++i)
+    int r = rows; //iloœæ wierszy macierzy wyniku
+    int c = right.getCols(); //iloœæ kolumn macierzy wyniku
+
+    for (int i = 0; i < r; ++i)
     {
-        for (int j = 0; j < cols; ++j)
+        for (int j = 0; j < c; ++j)
         {
-            result.setItem(i, j, "ok");
+            for (int k = 0; k < cols; ++k)
+                result.setItem(i, j,
+                sumOfString(result.get(i, j),
+                multOfString(mat[i][k], right.get(k, j))));
         }
     }
-
     return result;
 }
 // -----------------------------------------------------------------------------
@@ -263,6 +310,13 @@ bool aghMatrix<char*>::operator== (const aghMatrix<char*>& right)
     {
         for (int j = 0; j < cols; ++j)
         {
+            if (mat[i][j] == nullptr || right.get(i, j) == nullptr)
+            {
+                if (mat[i][j] == nullptr && right.get(i, j) == nullptr)
+                    continue;
+                else
+                    return false;
+            }
             if (strcmp(mat[i][j], right.get(i, j)) != 0)
                 return false;
         }

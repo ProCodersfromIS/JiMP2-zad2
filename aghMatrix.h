@@ -157,6 +157,10 @@ aghMatrix<char> aghMatrix<char>::operator+ (aghMatrix<char> const & orig);
 template <>
 aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & orig);
 
+/// \brief Specjalizowany konstruktor parametrowy dla char*
+template<>
+aghMatrix<char*>::aghMatrix(int r, int c);
+
 /// \brief Specjalizowany konstruktor kopiuj¹cy
 ///
 /// \param orig - obiekt wzorzec
@@ -228,8 +232,7 @@ template<>
 aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & right);
 
 template<>
-aghMatrix<char*>::aghMatrix(int r, int c);
-// --------------------------------------------------------------------------
+void aghMatrix<char*>::free(void);
 
 // -----------------------------------------------------------------------------
 //Definicje metod szablonu klasy aghMatrix
@@ -382,14 +385,14 @@ void aghMatrix<T>::setItems(int r, int c, ...)
     this->free();
     this->alloc(r, c);
 
-    va_list vl;
-    va_start(vl, c);
+    va_list listOfValues;
+    va_start(listOfValues, c);
     for (int i = 0; i < r; i++) {
         for (int j = 0; j < c; j++) {
-            mat[i][j] = va_arg(vl, T);
+            mat[i][j] = va_arg(listOfValues, T);
         }
     }
-    va_end(vl);
+    va_end (listOfValues);
 }
 // -----------------------------------------------------------------------------
 
