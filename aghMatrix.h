@@ -157,6 +157,10 @@ aghMatrix<char> aghMatrix<char>::operator+ (aghMatrix<char> const & orig);
 template <>
 aghMatrix<char> aghMatrix<char>::operator* (aghMatrix<char> const & orig);
 
+/// \brief Specjalizowana metoda free dla char*
+template<>
+void aghMatrix<char*>::free(void);
+
 /// \brief Specjalizowany konstruktor parametrowy dla char*
 template<>
 aghMatrix<char*>::aghMatrix(int r, int c);
@@ -230,9 +234,6 @@ aghMatrix<char*> aghMatrix<char*>::operator+ (aghMatrix<char*> const & right);
 /// \return - obiekt, który jest wynikiem mno¿enia
 template<>
 aghMatrix<char*> aghMatrix<char*>::operator* (aghMatrix<char*> const & right);
-
-template<>
-void aghMatrix<char*>::free(void);
 
 // -----------------------------------------------------------------------------
 //Definicje metod szablonu klasy aghMatrix
